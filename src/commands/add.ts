@@ -24,6 +24,12 @@ export class Add extends Command {
       hidden: false,
       required: false,
     }),
+    multiline: flags.boolean({
+      char: "m",
+      description: "Enables multiline mode in body",
+      hidden: false,
+      required: false,
+    }),
   };
   async run() {
     const { flags } = this.parse(Add);
@@ -37,7 +43,9 @@ export class Add extends Command {
           },
         }
       : await addNoteCloud(
-          flags.secret ? await this.secretInput() : await this.normalInput() //Secret Note check
+          flags.secret
+            ? await this.secretInput(flags.multiline)
+            : await this.normalInput(flags.multiline) //Secret Note check
         ); // Note type check
     if (response.success) {
       if (flags.secret) response.note.body = "<Hidden>"; // Hides body for secret note
@@ -55,8 +63,13 @@ export class Add extends Command {
     } else console.log(chalk.red.bold(response.message));
   }
 
-  normalInput = async (): Promise<NoteObject> => {
+  normalInput = async (multiline: boolean): Promise<NoteObject> => {
     console.log(chalk.underline("Adding a new note"));
+    multiline &&
+      console.log(
+        chalk.cyan("INFO: ") +
+          "Multiline mode for node body is enabled. Press enter for newline, press shift+enter to continue"
+      );
     // Title of the note
     const { title } = await prompt({
       type: "input",
@@ -69,6 +82,7 @@ export class Add extends Command {
     // Body of the note
     const { body } = await prompt({
       type: "input",
+      multiline: multiline,
       name: "body",
       message: "Write your note",
       validate: (value) => {
@@ -82,8 +96,13 @@ export class Add extends Command {
     return note;
   };
 
-  secretInput = async (): Promise<NoteObject> => {
+  secretInput = async (multiline: boolean): Promise<NoteObject> => {
     console.log(chalk.underline("Adding a new secret note"));
+    multiline &&
+      console.log(
+        chalk.cyan("INFO: ") +
+          "Multiline mode for note body is enabled. Press enter for newline, press shift+enter to continue"
+      );
     // Title of the note
     const { title } = await prompt({
       type: "input",
@@ -96,6 +115,7 @@ export class Add extends Command {
     // Body of the note
     const { body } = await prompt({
       type: "invisible",
+      multiline: multiline,
       name: "body",
       message: "Write your secret note (invisible in console)",
       validate: (value) => {
