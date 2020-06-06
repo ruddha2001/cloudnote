@@ -1,5 +1,4 @@
-cloudnote
-=========
+# cloudnote
 
 A simple note management CLI
 
@@ -9,11 +8,15 @@ A simple note management CLI
 [![License](https://img.shields.io/npm/l/cloudnote.svg)](https://github.com/ruddha2001/cloudnote/blob/master/package.json)
 
 <!-- toc -->
-* [Usage](#usage)
-* [Commands](#commands)
+
+- [Usage](#usage)
+- [Commands](#commands)
 <!-- tocstop -->
+
 # Usage
+
 <!-- usage -->
+
 ```sh-session
 $ npm install -g cloudnote
 $ cloudnote COMMAND
@@ -25,31 +28,14 @@ USAGE
   $ cloudnote COMMAND
 ...
 ```
+
 <!-- usagestop -->
+
 # Commands
+
 <!-- commands -->
-* [`cloudnote hello [FILE]`](#cloudnote-hello-file)
-* [`cloudnote help [COMMAND]`](#cloudnote-help-command)
 
-## `cloudnote hello [FILE]`
-
-describe the command here
-
-```
-USAGE
-  $ cloudnote hello [FILE]
-
-OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
-
-EXAMPLE
-  $ cloudnote hello
-  hello world from ./src/hello.ts!
-```
-
-_See code: [src\commands\hello.ts](https://github.com/ruddha2001/cloudnote/blob/v0.0.0/src\commands\hello.ts)_
+- [`cloudnote help [COMMAND]`](#cloudnote-help-command)
 
 ## `cloudnote help [COMMAND]`
 
@@ -67,4 +53,5 @@ OPTIONS
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.1.0/src\commands\help.ts)_
+
 <!-- commandsstop -->
