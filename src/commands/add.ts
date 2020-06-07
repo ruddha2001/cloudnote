@@ -1,13 +1,10 @@
 import { Command, flags } from "@oclif/command";
 import cli from "cli-ux";
 import { prompt } from "enquirer";
-import { boolean } from "@oclif/command/lib/flags";
 import * as chalk from "chalk";
-import {
-  addNoteCloud,
-  ResponseInterface,
-  NoteObject,
-} from "../functionalities";
+import { addNoteCloud } from "../controllers";
+import { NoteObject, ResponseInterface } from "../interfaces";
+import { errors } from "../constants";
 
 export class Add extends Command {
   static description = "Add a new note";
@@ -31,22 +28,22 @@ export class Add extends Command {
       required: false,
     }),
   };
+
   async run() {
     const { flags } = this.parse(Add);
-    let response = flags.offline
+    let response: ResponseInterface = flags.offline
       ? {
-          success: false,
-          message: "This feature is locked/not supported in this version",
+          success: errors.FEATURE_LOCKED.success,
+          message: errors.FEATURE_LOCKED.message,
           note: {
-            title: null,
-            body: null,
+            title: "",
+            body: "",
           },
         }
       : await addNoteCloud(
-          flags.secret
-            ? await this.secretInput(flags.multiline)
-            : await this.normalInput(flags.multiline) //Secret Note check
-        ); // Note type check
+          await this.inputNote(flags.multiline, flags.secret),
+          "aniruddha"
+        );
     if (response.success) {
       if (flags.secret) response.note.body = "<Hidden>"; // Hides body for secret note
       console.log();
@@ -123,6 +120,46 @@ export class Add extends Command {
       },
     });
     let note = {
+      title: title,
+      body: body,
+    };
+    return note;
+  };
+
+  inputNote = async (
+    multiline: boolean,
+    secret: boolean
+  ): Promise<NoteObject> => {
+    console.log(
+      chalk.underline("Adding a new " + secret ? "secret note" : "note")
+    );
+    multiline &&
+      console.log(
+        chalk.cyan("INFO: ") +
+          "Multiline mode for note body is enabled. Press enter for newline, press shift+enter to continue"
+      );
+    // Title of the note
+    const { title } = await prompt({
+      type: "input",
+      name: "title",
+      message: "What is the title?",
+      validate: (value) => {
+        return value.length > 0 ? true : "Title cannot be empty";
+      },
+    });
+    // Body of the note
+    const { body } = await prompt({
+      type: secret ? "invisible" : "input",
+      multiline: multiline,
+      name: "body",
+      message:
+        "Write your " + secret ? "secret note (invisible in console)" : "note",
+      validate: (value) => {
+        return value.length > 0 ? true : "Note body cannot be empty";
+      },
+    });
+
+    let note: NoteObject = {
       title: title,
       body: body,
     };
