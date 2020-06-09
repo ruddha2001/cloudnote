@@ -1,12 +1,19 @@
-import { NoteObject, ResponseInterface } from "../interfaces";
+import { NoteObject, AddNoteResponseObject } from "../types";
 import { errors } from "../constants";
-import { networkInterfaces } from "os";
 
 export const addNoteCloud = (
   document: NoteObject,
   username: string
-): ResponseInterface => {
+): AddNoteResponseObject => {
   try {
+    return {
+      success: true,
+      message: "The note was added successfully",
+      note: {
+        title: document.title,
+        body: document.body,
+      },
+    };
   } catch (error) {
     let newError = errors.DB_INSERT_ERROR;
     return {
@@ -18,12 +25,4 @@ export const addNoteCloud = (
       },
     };
   }
-  return {
-    success: true,
-    message: "The note was added successfully",
-    note: {
-      title: document.title,
-      body: document.body,
-    },
-  };
 };

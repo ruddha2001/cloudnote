@@ -3,11 +3,14 @@ import cli from "cli-ux";
 import { prompt } from "enquirer";
 import * as chalk from "chalk";
 import { addNoteCloud } from "../controllers";
-import { NoteObject, ResponseInterface } from "../interfaces";
+import { NoteObject, AddNoteResponseObject } from "../types";
 import { errors } from "../constants";
 
 export class Add extends Command {
+  // Description of the command
   static description = "Add a new note";
+
+  // Flags
   static flags = {
     offline: flags.boolean({
       char: "o",
@@ -31,7 +34,7 @@ export class Add extends Command {
 
   async run() {
     const { flags } = this.parse(Add);
-    let response: ResponseInterface = flags.offline
+    let response: AddNoteResponseObject = flags.offline
       ? {
           success: errors.FEATURE_LOCKED.success,
           message: errors.FEATURE_LOCKED.message,
@@ -60,84 +63,29 @@ export class Add extends Command {
     } else console.log(chalk.red.bold(response.message));
   }
 
-  normalInput = async (multiline: boolean): Promise<NoteObject> => {
-    console.log(chalk.underline("Adding a new note"));
-    multiline &&
-      console.log(
-        chalk.cyan("INFO: ") +
-          "Multiline mode for node body is enabled. Press enter for newline, press shift+enter to continue"
-      );
-    // Title of the note
-    const { title } = await prompt({
-      type: "input",
-      name: "title",
-      message: "What is the title?",
-      validate: (value) => {
-        return value.length > 0 ? true : "Title cannot be empty";
-      },
-    });
-    // Body of the note
-    const { body } = await prompt({
-      type: "input",
-      multiline: multiline,
-      name: "body",
-      message: "Write your note",
-      validate: (value) => {
-        return value.length > 0 ? true : "Note body cannot be empty";
-      },
-    });
-    let note = {
-      title: title,
-      body: body,
-    };
-    return note;
-  };
-
-  secretInput = async (multiline: boolean): Promise<NoteObject> => {
-    console.log(chalk.underline("Adding a new secret note"));
-    multiline &&
-      console.log(
-        chalk.cyan("INFO: ") +
-          "Multiline mode for note body is enabled. Press enter for newline, press shift+enter to continue"
-      );
-    // Title of the note
-    const { title } = await prompt({
-      type: "input",
-      name: "title",
-      message: "What is the title?",
-      validate: (value) => {
-        return value.length > 0 ? true : "Title cannot be empty";
-      },
-    });
-    // Body of the note
-    const { body } = await prompt({
-      type: "invisible",
-      multiline: multiline,
-      name: "body",
-      message: "Write your secret note (invisible in console)",
-      validate: (value) => {
-        return value.length > 0 ? true : "Note body cannot be empty";
-      },
-    });
-    let note = {
-      title: title,
-      body: body,
-    };
-    return note;
-  };
-
   inputNote = async (
     multiline: boolean,
     secret: boolean
   ): Promise<NoteObject> => {
-    console.log(
-      chalk.underline("Adding a new " + secret ? "secret note" : "note")
-    );
+    let addText = secret === true ? "secret " : "";
+    let invisibleText =
+      secret === true ? "secret note (invisible in console)" : "note";
+    console.log(chalk.underline(`Adding a new ${addText}note`));
+
+    // Offline mode check
     multiline &&
       console.log(
         chalk.cyan("INFO: ") +
-          "Multiline mode for note body is enabled. Press enter for newline, press shift+enter to continue"
+          "Offline mode for note is enabled. The note will be saved locally."
       );
+
+    // Multiline mode check
+    multiline &&
+      console.log(
+        chalk.cyan("INFO: ") +
+          "Multiline mode for note body is enabled. Press enter for newline, press shift+enter to continue."
+      );
+
     // Title of the note
     const { title } = await prompt({
       type: "input",
@@ -147,13 +95,13 @@ export class Add extends Command {
         return value.length > 0 ? true : "Title cannot be empty";
       },
     });
+
     // Body of the note
     const { body } = await prompt({
-      type: secret ? "invisible" : "input",
+      type: secret === true ? "invisible" : "input",
       multiline: multiline,
       name: "body",
-      message:
-        "Write your " + secret ? "secret note (invisible in console)" : "note",
+      message: `Write your ${invisibleText}`,
       validate: (value) => {
         return value.length > 0 ? true : "Note body cannot be empty";
       },
