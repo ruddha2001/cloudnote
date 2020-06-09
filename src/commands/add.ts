@@ -86,31 +86,36 @@ export class Add extends Command {
           "Multiline mode for note body is enabled. Press enter for newline, press shift+enter to continue."
       );
 
-    // Title of the note
-    const { title } = await prompt({
-      type: "input",
-      name: "title",
-      message: "What is the title?",
-      validate: (value) => {
-        return value.length > 0 ? true : "Title cannot be empty";
-      },
-    });
+    try {
+      // Title of the note
+      const { title } = await prompt({
+        type: "input",
+        name: "title",
+        message: "What is the title?",
+        validate: (value) => {
+          return value.length > 0 ? true : "Title cannot be empty";
+        },
+      });
 
-    // Body of the note
-    const { body } = await prompt({
-      type: secret === true ? "invisible" : "input",
-      multiline: multiline,
-      name: "body",
-      message: `Write your ${invisibleText}`,
-      validate: (value) => {
-        return value.length > 0 ? true : "Note body cannot be empty";
-      },
-    });
+      // Body of the note
+      const { body } = await prompt({
+        type: secret === true ? "invisible" : "input",
+        multiline: multiline,
+        name: "body",
+        message: `Write your ${invisibleText}`,
+        validate: (value) => {
+          return value.length > 0 ? true : "Note body cannot be empty";
+        },
+      });
 
-    let note: NoteObject = {
-      title: title,
-      body: body,
-    };
-    return note;
+      let note: NoteObject = {
+        title: title,
+        body: body,
+      };
+      return note;
+    } catch (error) {
+      console.log(chalk.cyan("ERROR: ") + errors.USER_CANCELLED.message);
+      throw error;
+    }
   };
 }

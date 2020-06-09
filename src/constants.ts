@@ -11,4 +11,8 @@ export const errors = {
     success: false,
     message: "This feature is locked/not supported in this version.",
   },
+  USER_CANCELLED: {
+    success: false,
+    message: "User interuppted the operation",
+  },
 };
