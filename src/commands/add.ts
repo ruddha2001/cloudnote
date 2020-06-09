@@ -2,7 +2,7 @@ import { Command, flags } from "@oclif/command";
 import cli from "cli-ux";
 import { prompt } from "enquirer";
 import * as chalk from "chalk";
-import { addNoteCloud } from "../controllers";
+import { addNoteCloud, addNoteLocal } from "../controllers";
 import { NoteObject, AddNoteResponseObject } from "../types";
 import { errors } from "../constants";
 
@@ -35,16 +35,12 @@ export class Add extends Command {
   async run() {
     const { flags } = this.parse(Add);
     let response: AddNoteResponseObject = flags.offline
-      ? {
-          success: errors.FEATURE_LOCKED.success,
-          message: errors.FEATURE_LOCKED.message,
-          note: {
-            title: "",
-            body: "",
-          },
-        }
+      ? await addNoteLocal(
+          await this.inputNote(flags.multiline, flags.secret, flags.offline),
+          "aniruddha"
+        )
       : await addNoteCloud(
-          await this.inputNote(flags.multiline, flags.secret),
+          await this.inputNote(flags.multiline, flags.secret, flags.offline),
           "aniruddha"
         );
     if (response.success) {
@@ -65,7 +61,8 @@ export class Add extends Command {
 
   inputNote = async (
     multiline: boolean,
-    secret: boolean
+    secret: boolean,
+    offline: boolean
   ): Promise<NoteObject> => {
     let addText = secret === true ? "secret " : "";
     let invisibleText =
@@ -73,7 +70,7 @@ export class Add extends Command {
     console.log(chalk.underline(`Adding a new ${addText}note`));
 
     // Offline mode check
-    multiline &&
+    offline &&
       console.log(
         chalk.cyan("INFO: ") +
           "Offline mode for note is enabled. The note will be saved locally."
