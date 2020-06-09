@@ -1,6 +1,8 @@
 # cloudnote
 
-A simple note management CLI
+- Manage notes right from your terminal
+- Sync your notes across all your devices
+- Do more with Offline and Secret notes
 
 [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/cloudnote.svg)](https://npmjs.org/package/cloudnote)

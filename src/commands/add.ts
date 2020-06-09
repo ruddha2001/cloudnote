@@ -1,16 +1,16 @@
 import { Command, flags } from "@oclif/command";
 import cli from "cli-ux";
 import { prompt } from "enquirer";
-import { boolean } from "@oclif/command/lib/flags";
 import * as chalk from "chalk";
-import {
-  addNoteCloud,
-  ResponseInterface,
-  NoteObject,
-} from "../functionalities";
+import { addNoteCloud, addNoteLocal } from "../controllers";
+import { NoteObject, AddNoteResponseObject } from "../types";
+import { errors } from "../constants";
 
 export class Add extends Command {
+  // Description of the command
   static description = "Add a new note";
+
+  // Flags
   static flags = {
     offline: flags.boolean({
       char: "o",
@@ -24,21 +24,25 @@ export class Add extends Command {
       hidden: false,
       required: false,
     }),
+    multiline: flags.boolean({
+      char: "m",
+      description: "Enables multiline mode in body",
+      hidden: false,
+      required: false,
+    }),
   };
+
   async run() {
     const { flags } = this.parse(Add);
-    let response = flags.offline
-      ? {
-          success: false,
-          message: "This feature is locked/not supported in this version",
-          note: {
-            title: null,
-            body: null,
-          },
-        }
+    let response: AddNoteResponseObject = flags.offline
+      ? await addNoteLocal(
+          await this.inputNote(flags.multiline, flags.secret, flags.offline),
+          "aniruddha"
+        )
       : await addNoteCloud(
-          flags.secret ? await this.secretInput() : await this.normalInput() //Secret Note check
-        ); // Note type check
+          await this.inputNote(flags.multiline, flags.secret, flags.offline),
+          "aniruddha"
+        );
     if (response.success) {
       if (flags.secret) response.note.body = "<Hidden>"; // Hides body for secret note
       console.log();
@@ -55,57 +59,60 @@ export class Add extends Command {
     } else console.log(chalk.red.bold(response.message));
   }
 
-  normalInput = async (): Promise<NoteObject> => {
-    console.log(chalk.underline("Adding a new note"));
-    // Title of the note
-    const { title } = await prompt({
-      type: "input",
-      name: "title",
-      message: "What is the title?",
-      validate: (value) => {
-        return value.length > 0 ? true : "Title cannot be empty";
-      },
-    });
-    // Body of the note
-    const { body } = await prompt({
-      type: "input",
-      name: "body",
-      message: "Write your note",
-      validate: (value) => {
-        return value.length > 0 ? true : "Note body cannot be empty";
-      },
-    });
-    let note = {
-      title: title,
-      body: body,
-    };
-    return note;
-  };
+  inputNote = async (
+    multiline: boolean,
+    secret: boolean,
+    offline: boolean
+  ): Promise<NoteObject> => {
+    let addText = secret === true ? "secret " : "";
+    let invisibleText =
+      secret === true ? "secret note (invisible in console)" : "note";
+    console.log(chalk.underline(`Adding a new ${addText}note`));
 
-  secretInput = async (): Promise<NoteObject> => {
-    console.log(chalk.underline("Adding a new secret note"));
-    // Title of the note
-    const { title } = await prompt({
-      type: "input",
-      name: "title",
-      message: "What is the title?",
-      validate: (value) => {
-        return value.length > 0 ? true : "Title cannot be empty";
-      },
-    });
-    // Body of the note
-    const { body } = await prompt({
-      type: "invisible",
-      name: "body",
-      message: "Write your secret note (invisible in console)",
-      validate: (value) => {
-        return value.length > 0 ? true : "Note body cannot be empty";
-      },
-    });
-    let note = {
-      title: title,
-      body: body,
-    };
-    return note;
+    // Offline mode check
+    offline &&
+      console.log(
+        chalk.cyan("INFO: ") +
+          "Offline mode for note is enabled. The note will be saved locally."
+      );
+
+    // Multiline mode check
+    multiline &&
+      console.log(
+        chalk.cyan("INFO: ") +
+          "Multiline mode for note body is enabled. Press enter for newline, press shift+enter to continue."
+      );
+
+    try {
+      // Title of the note
+      const { title } = await prompt({
+        type: "input",
+        name: "title",
+        message: "What is the title?",
+        validate: (value) => {
+          return value.length > 0 ? true : "Title cannot be empty";
+        },
+      });
+
+      // Body of the note
+      const { body } = await prompt({
+        type: secret === true ? "invisible" : "input",
+        multiline: multiline,
+        name: "body",
+        message: `Write your ${invisibleText}`,
+        validate: (value) => {
+          return value.length > 0 ? true : "Note body cannot be empty";
+        },
+      });
+
+      let note: NoteObject = {
+        title: title,
+        body: body,
+      };
+      return note;
+    } catch (error) {
+      console.log(chalk.cyan("ERROR: ") + errors.USER_CANCELLED.message);
+      throw error;
+    }
   };
 }
