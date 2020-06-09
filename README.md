@@ -11,6 +11,7 @@
 
 <!-- toc -->
 
+- [cloudnote](#cloudnote)
 - [Usage](#usage)
 - [Commands](#commands)
 <!-- tocstop -->
@@ -37,7 +38,24 @@ USAGE
 
 <!-- commands -->
 
+- [`cloudnote add`](#cloudnote-add)
 - [`cloudnote help [COMMAND]`](#cloudnote-help-command)
+
+## `cloudnote add`
+
+Add a new note
+
+```
+USAGE
+  $ cloudnote add
+
+OPTIONS
+  -m, --multiline  Enables multiline mode in body
+  -o, --offline    Specifies note to be saved offline
+  -s, --secret     Prevents the note body from being displayed in the console
+```
+
+_See code: [src\commands\add.ts](https://github.com/ruddha2001/cloudnote/blob/v0.0.0/src\commands\add.ts)_
 
 ## `cloudnote help [COMMAND]`
 

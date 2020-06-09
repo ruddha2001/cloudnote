@@ -1,0 +1,15 @@
+name: cloudnote
+version: git
+summary: Cross Platform CLI for Notes Management
+description: Cross Platform CLI for Notes Management
+
+base: core18
+confinement: devmode
+
+parts:
+  cloudnote:
+    plugin: nodejs
+
+apps:
+  cloudnote:
+    command: bin/run
