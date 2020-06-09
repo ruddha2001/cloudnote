@@ -58,6 +58,8 @@ export const addNoteLocal = async (
 ): Promise<AddNoteResponseObject> => {
   try {
     let notesArray = readLocalNotes();
+
+    // Check for existing note
     let duplicateNotes = notesArray.filter(function (note) {
       return note.title === document.title;
     });
@@ -77,6 +79,22 @@ export const addNoteLocal = async (
         message: "Do you wish to over-write it?",
       });
       if (!choice) throw new Error("choice");
+
+      // Find index of duplicate note
+      let index = -1;
+      for (let i = 0; i < notesArray.length; i++) {
+        if (notesArray[i].title === document.title) {
+          index = i;
+          break;
+        }
+      }
+      // Delete the note
+      notesArray.splice(index, 1);
+      // Add the note
+      notesArray.push({
+        title: document.title,
+        body: document.body,
+      });
     }
     let result = saveLocalNotes(notesArray);
     if (!result) throw new Error();
